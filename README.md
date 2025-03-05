@@ -78,7 +78,12 @@ kubectl describe pod <pod-name>
 kubectl logs <pod-name>
 ```
 
-### 6. Cleanup
+### 6. Access Application at browser
+```bash
+http://<aws-nlb-dns-name>
+```
+
+### 7. Cleanup
 ```bash
 # Delete deployed resources
 kubectl delete -f tic-tac-toe.yaml -f ingress-nginx-route.yaml
