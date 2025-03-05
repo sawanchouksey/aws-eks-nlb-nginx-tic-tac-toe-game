@@ -1,0 +1,37 @@
+terraform init
+
+terraform fmt
+
+terraform validate
+
+terraform plan
+
+terraform apply
+
+aws eks update-kubeconfig --name eks-monitoring-01 --region ap-south-1
+
+helm install nginx-ingress .\nginx-ingress\ -n default --create-namespace
+
+kubectl get svc
+
+kubectl get pod
+
+kubectl apply -f .\tic-tac-toe.yaml
+
+kubectl apply -f .\ingress-nginx-route.yaml
+
+kubectl get ingress
+
+kubectl describe ingress
+
+kubectl get svc
+
+kubectl get pod
+
+kubectl describe pod tic-tac-toe-deployment-58bdfc64b8-l48fk
+
+kubectl logs tic-tac-toe-deployment-58bdfc64b8-l48fk
+
+kubectl delete -f .\tic-tac-toe.yaml -f .\ingress-nginx-route.yaml
+
+terraform destroy

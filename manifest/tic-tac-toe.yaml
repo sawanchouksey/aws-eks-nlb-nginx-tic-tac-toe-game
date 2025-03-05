@@ -1,0 +1,69 @@
+# Deployment Configuration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tic-tac-toe-deployment
+  labels:
+    app: tic-tac-toe
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tic-tac-toe
+  template:
+    metadata:
+      labels:
+        app: tic-tac-toe
+    spec:
+      containers:
+      - name: tic-tac-toe
+        image:  2207sawan/tic-tac-toe:latest
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            cpu: 250m
+            memory: 500Mi
+          limits:
+            cpu: 500m
+            memory: 1000Mi
+---
+# Service Configuration
+apiVersion: v1
+kind: Service
+metadata:
+  name: tic-tac-toe-service
+spec:
+  type: ClusterIP
+  selector:
+    app: tic-tac-toe
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+---
+# Horizontal Pod Autoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: tic-tac-toe-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: tic-tac-toe-deployment
+  minReplicas: 1
+  maxReplicas: 2
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 70
