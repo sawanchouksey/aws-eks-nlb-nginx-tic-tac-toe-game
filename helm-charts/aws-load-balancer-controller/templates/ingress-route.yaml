@@ -1,0 +1,48 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "aws-load-balancer-controller.fullname" . }}-ingress
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    
+    # Dynamic ALB-specific annotations
+    alb.ingress.kubernetes.io/scheme: {{ .Values.ingress.scheme | default "internal" }}
+    alb.ingress.kubernetes.io/load-balancer-name: {{ .Values.ingress.loadBalancerName }}
+    alb.ingress.kubernetes.io/subnets: {{ join "," .Values.ingress.subnets }}
+    alb.ingress.kubernetes.io/security-groups: {{ join "," .Values.ingress.securityGroups }}
+    alb.ingress.kubernetes.io/target-type: {{ .Values.ingress.targetType | default "ip" }}
+    
+    {{- if .Values.ingress.certificateArn }}
+    alb.ingress.kubernetes.io/certificate-arn: {{ .Values.ingress.certificateArn }}
+    {{- end }}
+    
+    # Health Check Configurations
+    alb.ingress.kubernetes.io/healthcheck-path: {{ .Values.ingress.healthCheck.path | default "/healthz" }}
+    alb.ingress.kubernetes.io/healthcheck-port: {{ .Values.ingress.healthCheck.port | default "traffic-port" }}
+    alb.ingress.kubernetes.io/healthcheck-protocol: {{ .Values.ingress.healthCheck.protocol | default "HTTP" }}
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "{{ .Values.ingress.healthCheck.intervalSeconds | default 30 }}"
+    alb.ingress.kubernetes.io/success-codes: "{{ .Values.ingress.healthCheck.successCodes | default "200-399" }}"
+spec:
+  ingressClassName: alb
+  {{- if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.path | default "/" }}
+            pathType: {{ .Values.ingress.pathType | default "Prefix" }}
+            backend:
+              service:
+                name: {{ .Values.ingress.serviceName }}
+                port:
+                  number: {{ .Values.ingress.servicePort }}
+{{- end }}
